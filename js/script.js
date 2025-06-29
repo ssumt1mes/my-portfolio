@@ -56,18 +56,361 @@ window.addEventListener("scroll", () => {
   lastScrollTop = scrollTop;
 });
 
-// Project details toggle
-function toggleDetails(button) {
-  const details = button.nextElementSibling;
-  const isActive = details.classList.contains("active");
+// Create modal for project details
+function createModal() {
+  const modal = document.createElement("div");
+  modal.className = "project-modal";
+  modal.innerHTML = `
+        <div class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title"></h2>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-description"></div>
+                    <div class="modal-tech"></div>
+                    <div class="modal-details"></div>
+                    <div class="modal-screenshots"></div>
+                </div>
+                <div class="modal-footer">
+                    <div class="modal-links"></div>
+                </div>
+            </div>
+        </div>
+    `;
 
-  if (isActive) {
-    details.classList.remove("active");
-    button.textContent = "자세히 보기";
-  } else {
-    details.classList.add("active");
-    button.textContent = "접기";
+  document.body.appendChild(modal);
+
+  // Modal styles
+  const modalStyles = document.createElement("style");
+  modalStyles.textContent = `
+        .project-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2000;
+            display: none;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .project-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: var(--card-background);
+            border-radius: 20px;
+            max-width: 800px;
+            max-height: 90vh;
+            width: 100%;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transform: scale(0.7);
+            transition: transform 0.3s ease;
+        }
+        
+        .project-modal.active .modal-content {
+            transform: scale(1);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 30px 20px 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .modal-title {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin: 0;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--secondary-color);
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-close:hover {
+            background: var(--light-gray);
+            color: var(--primary-color);
+        }
+        
+        .modal-body {
+            padding: 30px;
+        }
+        
+        .modal-description {
+            font-size: 1.1rem;
+            color: var(--secondary-color);
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        
+        .modal-tech {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .modal-tech .tech-tag {
+            padding: 6px 12px;
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--accent-color);
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .modal-details {
+            margin-bottom: 30px;
+        }
+        
+        .modal-details h4 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .modal-details ul {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 25px;
+        }
+        
+        .modal-details li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+            line-height: 1.5;
+        }
+        
+        .modal-details li:before {
+            content: '•';
+            color: var(--accent-color);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+        
+        .modal-screenshots {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .modal-screenshot {
+            width: 100%;
+            height: 150px;
+            background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        
+        .modal-screenshot:hover {
+            background: linear-gradient(135deg, #e0e0e0 0%, #d0d0d0 100%);
+        }
+        
+        .modal-footer {
+            padding: 20px 30px 30px 30px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .modal-links {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .modal-link {
+            padding: 12px 24px;
+            background: var(--accent-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .modal-link:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+        
+        .modal-link.secondary {
+            background: var(--light-gray);
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+        }
+        
+        .modal-link.secondary:hover {
+            background: var(--border-color);
+        }
+        
+        @media (max-width: 768px) {
+            .modal-content {
+                max-height: 95vh;
+                margin: 0;
+                border-radius: 15px;
+            }
+            
+            .modal-header {
+                padding: 20px 20px 15px 20px;
+            }
+            
+            .modal-title {
+                font-size: 1.5rem;
+            }
+            
+            .modal-body {
+                padding: 20px;
+            }
+            
+            .modal-footer {
+                padding: 15px 20px 20px 20px;
+            }
+            
+            .modal-links {
+                flex-direction: column;
+            }
+            
+            .modal-screenshots {
+                grid-template-columns: 1fr;
+            }
+        }
+    `;
+  document.head.appendChild(modalStyles);
+
+  return modal;
+}
+
+// Project details modal function
+function toggleDetails(button) {
+  const projectCard = button.closest(".project-card");
+  const projectTitle = projectCard.querySelector("h3").textContent;
+  const projectDescription = projectCard.querySelector("p").textContent;
+  const techTags = projectCard.querySelectorAll(".tech-tag");
+  const projectLinks = projectCard.querySelectorAll(".project-link");
+  const detailsContent = projectCard.querySelector(".project-details-content");
+
+  let modal = document.querySelector(".project-modal");
+  if (!modal) {
+    modal = createModal();
   }
+
+  // Populate modal content
+  modal.querySelector(".modal-title").textContent = projectTitle;
+  modal.querySelector(".modal-description").textContent = projectDescription;
+
+  // Add tech tags
+  const modalTech = modal.querySelector(".modal-tech");
+  modalTech.innerHTML = "";
+  techTags.forEach((tag) => {
+    const modalTag = document.createElement("span");
+    modalTag.className = "tech-tag";
+    modalTag.textContent = tag.textContent;
+    modalTech.appendChild(modalTag);
+  });
+
+  // Add detailed content
+  const modalDetails = modal.querySelector(".modal-details");
+  if (detailsContent) {
+    modalDetails.innerHTML = detailsContent.innerHTML;
+  }
+
+  // Add screenshots
+  const modalScreenshots = modal.querySelector(".modal-screenshots");
+  const screenshots = detailsContent
+    ? detailsContent.querySelectorAll(".screenshot")
+    : [];
+  modalScreenshots.innerHTML = "";
+  screenshots.forEach((screenshot) => {
+    const modalScreenshot = document.createElement("div");
+    modalScreenshot.className = "modal-screenshot";
+    modalScreenshot.textContent = screenshot.textContent;
+    modalScreenshots.appendChild(modalScreenshot);
+  });
+
+  // Add links
+  const modalLinks = modal.querySelector(".modal-links");
+  modalLinks.innerHTML = "";
+  projectLinks.forEach((link, index) => {
+    const modalLink = document.createElement("a");
+    modalLink.href = link.href;
+    modalLink.className = index === 0 ? "modal-link" : "modal-link secondary";
+    modalLink.textContent = link.textContent;
+    modalLink.target = "_blank";
+    modalLinks.appendChild(modalLink);
+  });
+
+  // Show modal
+  modal.classList.add("active");
+  document.body.style.overflow = "hidden";
+
+  // Close modal functionality
+  const closeModal = () => {
+    modal.classList.remove("active");
+    document.body.style.overflow = "";
+  };
+
+  modal.querySelector(".modal-close").onclick = closeModal;
+  modal.querySelector(".modal-overlay").onclick = (e) => {
+    if (e.target === modal.querySelector(".modal-overlay")) {
+      closeModal();
+    }
+  };
+
+  // Close with Escape key
+  const handleEscape = (e) => {
+    if (e.key === "Escape") {
+      closeModal();
+      document.removeEventListener("keydown", handleEscape);
+    }
+  };
+  document.addEventListener("keydown", handleEscape);
 }
 
 // Mobile menu toggle
@@ -132,6 +475,19 @@ function createMobileMenu() {
 }
 
 createMobileMenu();
+
+// Subtle hover effects for project cards
+document.querySelectorAll(".project-card").forEach((card) => {
+  card.addEventListener("mouseenter", function () {
+    this.style.transform = "translateY(-8px) scale(1.02)";
+    this.style.boxShadow = "0 15px 40px rgba(0, 0, 0, 0.15)";
+  });
+
+  card.addEventListener("mouseleave", function () {
+    this.style.transform = "translateY(0px) scale(1)";
+    this.style.boxShadow = "0 2px 20px rgba(0, 0, 0, 0.08)";
+  });
+});
 
 // Skill tags hover effect
 document.querySelectorAll(".skill-tag").forEach((tag) => {
@@ -202,31 +558,7 @@ loadingStyles.textContent = `
 `;
 document.head.appendChild(loadingStyles);
 
-// Project card tilt effect (desktop only)
-if (window.innerWidth > 1024) {
-  document.querySelectorAll(".project-card").forEach((card) => {
-    card.addEventListener("mousemove", function (e) {
-      const rect = this.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-
-      const rotateX = (y - centerY) / 20;
-      const rotateY = (centerX - x) / 20;
-
-      this.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-5px)`;
-    });
-
-    card.addEventListener("mouseleave", function () {
-      this.style.transform =
-        "perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)";
-    });
-  });
-}
-
-// Smooth scrolling enhancement for better performance
+// Smooth scrolling enhancement
 document.documentElement.style.scrollBehavior = "smooth";
 
 // Add active class to current navigation item
@@ -236,7 +568,6 @@ window.addEventListener("scroll", () => {
 
   sections.forEach((section) => {
     const sectionTop = section.offsetTop;
-    const sectionHeight = section.clientHeight;
     if (pageYOffset >= sectionTop - 200) {
       current = section.getAttribute("id");
     }
@@ -262,10 +593,3 @@ activeNavStyles.textContent = `
     }
 `;
 document.head.appendChild(activeNavStyles);
-
-// Preload critical resources
-const preloadLink = document.createElement("link");
-preloadLink.rel = "preload";
-preloadLink.as = "style";
-preloadLink.href = "css/style.css";
-document.head.appendChild(preloadLink);

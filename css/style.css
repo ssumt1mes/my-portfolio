@@ -219,6 +219,7 @@ section {
 /* Resume Sections */
 .resume-section {
   margin-bottom: 60px;
+  position: relative;
 }
 
 .resume-section h3 {
@@ -229,19 +230,56 @@ section {
   padding-bottom: 10px;
 }
 
+/* Timeline styles */
+.resume-section::before {
+  content: "";
+  position: absolute;
+  left: 30px;
+  top: 60px;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    var(--accent-color),
+    rgba(0, 122, 255, 0.3)
+  );
+  z-index: 1;
+}
+
 .resume-item {
   background: var(--card-background);
   padding: 30px;
   border-radius: 15px;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border-color);
   transition: all 0.3s ease;
+  margin-left: 70px;
+  position: relative;
+}
+
+.resume-item::before {
+  content: "";
+  position: absolute;
+  left: -55px;
+  top: 30px;
+  width: 16px;
+  height: 16px;
+  background: var(--accent-color);
+  border-radius: 50%;
+  border: 3px solid var(--background-color);
+  box-shadow: 0 0 0 3px var(--accent-color);
+  z-index: 2;
 }
 
 .resume-item:hover {
   transform: translateY(-5px);
   box-shadow: var(--shadow-hover);
+}
+
+.resume-item:hover::before {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 3px var(--accent-color), 0 0 20px rgba(0, 122, 255, 0.3);
 }
 
 .resume-item h4 {
@@ -271,6 +309,14 @@ section {
   color: var(--secondary-color);
   font-size: 0.9rem;
   margin-bottom: 15px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.resume-item .period::before {
+  content: "📅";
+  margin-right: 8px;
 }
 
 .resume-item ul {
@@ -1143,6 +1189,21 @@ footer {
 
   nav a {
     font-size: 0.9rem;
+  }
+
+  .resume-item {
+    padding: 25px 20px;
+    margin-left: 50px;
+  }
+
+  .resume-item::before {
+    left: -40px;
+    width: 12px;
+    height: 12px;
+  }
+
+  .resume-section::before {
+    left: 20px;
   }
 
   .employment-type {
