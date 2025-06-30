@@ -685,6 +685,26 @@ footer {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.block-image {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  margin-left: 6px;
+  vertical-align: middle;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.block-image img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
 /* Animations */
 @keyframes fadeInUp {
   from {
